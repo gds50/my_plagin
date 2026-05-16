@@ -9,6 +9,45 @@
 
 ---
 
+## [0.4.0] — 2026-05-16
+
+### Добавлено / Added
+
+- **Сортировка закладок мышью внутри виджета.** Включи «✎» на виджете
+  (или общий режим редактирования) и перетаскивай закладки между собой —
+  целевая позиция подсвечивается рамкой.
+  *Drag-to-reorder bookmarks within a widget. Enable «✎» or global edit mode,
+  then drag bookmarks; the target slot is highlighted with a ring.*
+
+### Исправлено / Fixed
+
+- **Кодировка заголовков с русскоязычных сайтов** (vk.ru и др. на windows-1251):
+  страница теперь читается как байты с автоопределением charset из HTTP-заголовка
+  или `<meta charset>`. Кракозябр больше нет.
+  *Page-title fetch encoding for Russian sites (vk.ru and other windows-1251 pages):
+  bytes are read raw and charset is auto-detected from HTTP header or `<meta charset>`.*
+
+- **Разрешение на доступ к сайтам** для подтягивания заголовков теперь запрашивается
+  один раз на все сайты (`*://*/*`), а не отдельно на каждый домен. После одного
+  «Разрешить» Chrome больше никогда не спрашивает.
+  *Site-access permission is now requested once for all origins (`*://*/*`) instead
+  of per-domain. After a single approval Chrome never prompts again.*
+
+- **Поисковик по умолчанию** из Настроек теперь действительно применяется в виджете
+  поиска (раньше виджет использовал только свою локальную настройку и глобальный
+  выбор игнорировался).
+  *Default search engine from Settings is now actually applied in the search widget
+  (it was reading per-widget config only, ignoring the global setting).*
+
+### Изменено / Changed
+
+- В Настройках выбор поисковика по умолчанию — выпадающий список с теми же
+  движками, что и в виджете. Раньше нужно было вписывать ключ руками.
+  *Search engine picker in Settings is a proper dropdown matching the widget,
+  no more typing the engine key by hand.*
+
+---
+
 ## [0.3.0] — 2026-05-16
 
 ### Добавлено / Added

@@ -25,6 +25,24 @@ export interface ChangelogEntry {
  */
 export const changelog: ChangelogEntry[] = [
   {
+    version: '0.4.0',
+    date: '2026-05-16',
+    ru: [
+      'Закладки теперь можно перетаскивать мышью внутри виджета для изменения порядка — включите «✎» или режим редактирования.',
+      'Исправлена кодировка при получении заголовка с русскоязычных сайтов (vk.ru и др. на windows-1251): больше нет кракозябр.',
+      'Разрешение на доступ к сайтам для подтягивания заголовков теперь спрашивается один раз на все сайты, а не на каждый домен отдельно.',
+      'Поисковик по умолчанию из Настроек теперь реально применяется в виджете поиска (раньше игнорировался).',
+      'В Настройках выбор поисковика сделан выпадающим списком (как в виджете) вместо ручного ввода key.',
+    ],
+    en: [
+      'Bookmarks can now be reordered by dragging within a widget — enable «✎» or full edit mode.',
+      'Fixed encoding for page-title fetch from Russian sites (vk.ru and other windows-1251 pages): no more garbled text.',
+      'Site-access permission for title fetching is now asked once for all sites instead of per-domain.',
+      'Default search engine from Settings is now actually applied in the search widget (was ignored before).',
+      'Search engine picker in Settings is a proper dropdown now (matches the widget), no more typing the key by hand.',
+    ],
+  },
+  {
     version: '0.3.0',
     date: '2026-05-16',
     ru: [
@@ -111,7 +129,7 @@ export const changelog: ChangelogEntry[] = [
 ];
 
 /** Current app version, kept in sync with package.json at build time. */
-export const APP_VERSION = '0.3.0';
+export const APP_VERSION = '0.4.0';
 
 /**
  * Compare two semver-ish strings. Returns >0 if a>b, <0 if a<b, 0 if equal.
