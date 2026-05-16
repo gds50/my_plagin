@@ -4,7 +4,7 @@
 import type { AppData } from '@/types';
 import { useAppStore } from '@/store/appStore';
 import { useUiStore } from '@/store/uiStore';
-import { createGist, pullGist, pushGist, hasToken } from '@/lib/gist';
+import { createGist, pullGist, pushGist, hasToken, findExistingGist } from '@/lib/gist';
 
 let pushTimer: ReturnType<typeof setTimeout> | null = null;
 const DEBOUNCE_MS = 30_000;
@@ -50,13 +50,24 @@ export async function syncPushNow(): Promise<void> {
 export async function syncPullNow(): Promise<AppData | null> {
   const state = useAppStore.getState();
   const data = state.data;
-  if (!data.settings.sync.gistId) return null;
   if (!(await hasToken())) return null;
   try {
-    const remote = await pullGist(data.settings.sync.gistId);
+    // If we don't have a gistId yet (e.g. fresh install on a new device),
+    // try to discover the existing MyStart gist on this GitHub account.
+    let gistId = data.settings.sync.gistId;
+    if (!gistId) {
+      const found = await findExistingGist();
+      if (!found) return null;
+      gistId = found;
+      await state.patchSettings({
+        sync: { ...data.settings.sync, gistId, lastPullAt: Date.now() },
+      });
+      useUiStore.getState().notify('Найдён существующий Gist для синхронизации', 'success');
+    }
+    const remote = await pullGist(gistId);
     if (!remote) return null;
     await state.patchSettings({
-      sync: { ...data.settings.sync, lastPullAt: Date.now() },
+      sync: { ...useAppStore.getState().data.settings.sync, lastPullAt: Date.now() },
     });
     return remote;
   } catch (e) {

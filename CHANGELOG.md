@@ -9,6 +9,23 @@
 
 ---
 
+## [0.2.4] — 2026-05-16
+
+### Исправлено / Fixed
+
+- Кнопка **«Pull сейчас»** была неактивна на новом устройстве, даже при
+  рабочем токене, потому что `gistId` хранится локально на той машине,
+  где выполнялся первый push. Теперь если локальный `gistId` пуст —
+  приложение ищет существующий Gist на вашем GitHub-аккаунте по имени
+  файла `mystart-config.json`, сохраняет его ID и выполняет pull.
+  *The “Pull now” button was disabled on a new device even with a valid
+  token, because `gistId` is stored locally on the machine that did the
+  first push. Now, if `gistId` is empty, the app auto-discovers the
+  existing gist on your GitHub account by filename, saves the ID and
+  performs the pull.*
+
+---
+
 ## [0.2.3] — 2026-05-16
 
 ### Изменено / Changed

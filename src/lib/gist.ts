@@ -89,3 +89,25 @@ export async function testGist(): Promise<{ login: string }> {
   const res = await gh('/user');
   return (await res.json()) as { login: string };
 }
+
+/**
+ * Find an existing private gist created by this app on the current account.
+ * Walks the user's gists (up to a few pages) and returns the first one
+ * that contains the well-known MyStart config filename.
+ * Returns null if nothing matches.
+ */
+export async function findExistingGist(): Promise<string | null> {
+  // 3 pages × 100 = up to 300 gists; enough for any normal account.
+  for (let page = 1; page <= 3; page++) {
+    const res = await gh(`/gists?per_page=100&page=${page}`);
+    const list = (await res.json()) as Array<{
+      id: string;
+      files: Record<string, unknown>;
+    }>;
+    if (!list.length) return null;
+    const hit = list.find((g) => g.files && GIST_FILENAME in g.files);
+    if (hit) return hit.id;
+    if (list.length < 100) return null;
+  }
+  return null;
+}

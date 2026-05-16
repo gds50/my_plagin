@@ -66,7 +66,7 @@ export function OptionsApp() {
   const onPullNow = async () => {
     const remote = await syncPullNow();
     if (!remote) {
-      notify('Нечего получать (нет gist или данных)', 'info');
+      notify('Нечего получать (на аккаунте нет MyStart-gist или файл пуст)', 'info');
       return;
     }
     if (confirm(`Применить данные из Gist (обновлены ${new Date(remote.updatedAt).toLocaleString()})?`)) {
@@ -234,7 +234,16 @@ export function OptionsApp() {
             <button className="btn btn-primary" onClick={onPushNow} disabled={!tokenSet || data.settings.sync.provider !== 'gist'}>
               ↑ Push сейчас
             </button>
-            <button className="btn" onClick={onPullNow} disabled={!tokenSet || !data.settings.sync.gistId}>
+            <button
+              className="btn"
+              onClick={onPullNow}
+              disabled={!tokenSet || data.settings.sync.provider !== 'gist'}
+              title={
+                data.settings.sync.gistId
+                  ? 'Скачать данные из связанного Gist'
+                  : 'Найти существующий Gist на этом аккаунте и скачать данные'
+              }
+            >
               ↓ Pull сейчас
             </button>
           </div>

@@ -25,6 +25,18 @@ export interface ChangelogEntry {
  */
 export const changelog: ChangelogEntry[] = [
   {
+    version: '0.2.4',
+    date: '2026-05-16',
+    ru: [
+      'Pull с GitHub Gist теперь работает на новом устройстве: если локальный gistId пуст, существующий Gist находится автоматически по имени файла.',
+      'Кнопка «Pull сейчас» активна, как только заданы токен и провайдер «GitHub Gist».',
+    ],
+    en: [
+      'GitHub Gist Pull now works on a new device: if no local gistId, an existing gist is auto-discovered by filename.',
+      'The “Pull now” button is enabled as soon as a token is saved and the provider is set to GitHub Gist.',
+    ],
+  },
+  {
     version: '0.2.3',
     date: '2026-05-16',
     ru: [
@@ -83,7 +95,7 @@ export const changelog: ChangelogEntry[] = [
 ];
 
 /** Current app version, kept in sync with package.json at build time. */
-export const APP_VERSION = '0.2.3';
+export const APP_VERSION = '0.2.4';
 
 /**
  * Compare two semver-ish strings. Returns >0 if a>b, <0 if a<b, 0 if equal.
