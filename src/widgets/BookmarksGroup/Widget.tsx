@@ -8,20 +8,18 @@ import { uid } from '@/lib/uid';
 import { Modal } from '@/components/Modal';
 import { cn } from '@/lib/cn';
 import { fetchPageTitle } from '@/lib/pageTitle';
+import {
+  BOOKMARK_DND,
+  LINK_DND,
+  setBookmarkDrag,
+  type BookmarkDragPayload,
+  type LinkDragPayload,
+} from '@/lib/dnd';
 
 interface Props {
   widget: Widget;
   wsId: string;
   pageId: string;
-}
-
-const DND_MIME = 'application/x-mystart-bookmark';
-
-interface DragPayload {
-  wsId: string;
-  pageId: string;
-  widgetId: string;
-  bookmarkId: string;
 }
 
 export function BookmarksWidget({ widget, wsId, pageId }: Props) {
@@ -64,26 +62,54 @@ export function BookmarksWidget({ widget, wsId, pageId }: Props) {
   // Cross-widget DnD is only enabled in the global full edit mode.
   const dropEnabled = editMode;
 
+  const acceptsBookmark = (types: readonly string[]) => types.includes(BOOKMARK_DND);
+  const acceptsLink = (types: readonly string[]) => types.includes(LINK_DND);
+
   const onDragOver = (e: React.DragEvent) => {
     if (!dropEnabled) return;
-    if (!e.dataTransfer.types.includes(DND_MIME)) return;
+    const types = e.dataTransfer.types;
+    if (!acceptsBookmark(types) && !acceptsLink(types)) return;
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    e.dataTransfer.dropEffect = acceptsBookmark(types) ? 'move' : 'copy';
     if (!dragOver) setDragOver(true);
   };
   const onDragLeave = () => setDragOver(false);
   const onDrop = (e: React.DragEvent) => {
     setDragOver(false);
     if (!dropEnabled) return;
-    const raw = e.dataTransfer.getData(DND_MIME);
-    if (!raw) return;
-    e.preventDefault();
-    try {
-      const src = JSON.parse(raw) as DragPayload;
-      if (src.widgetId === widget.id) return;
-      void moveBookmark(src, { wsId, pageId, widgetId: widget.id });
-    } catch {
-      /* ignore */
+
+    // 1) Internal bookmark-move first (richer payload).
+    const rawBookmark = e.dataTransfer.getData(BOOKMARK_DND);
+    if (rawBookmark) {
+      e.preventDefault();
+      try {
+        const src = JSON.parse(rawBookmark) as BookmarkDragPayload;
+        if (src.widgetId === widget.id) return;
+        void moveBookmark(src, { wsId, pageId, widgetId: widget.id });
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
+
+    // 2) Arbitrary link (TopSites / Recent / external).
+    const rawLink = e.dataTransfer.getData(LINK_DND);
+    if (rawLink) {
+      e.preventDefault();
+      try {
+        const link = JSON.parse(rawLink) as LinkDragPayload;
+        if (!link.url) return;
+        // Skip duplicates (same URL already in the list).
+        if (cfg.items.some((i) => i.url === link.url)) return;
+        const next: Bookmark = {
+          id: uid('b'),
+          title: link.title || link.url,
+          url: link.url,
+        };
+        void patch(wsId, pageId, widget.id, { items: [...cfg.items, next] });
+      } catch {
+        /* ignore */
+      }
     }
   };
 
@@ -186,11 +212,14 @@ function BookmarkItem({
 }) {
   const onDragStart = (e: React.DragEvent) => {
     if (!draggable) return;
-    const payload: DragPayload = { wsId, pageId, widgetId, bookmarkId: bookmark.id };
-    e.dataTransfer.setData(DND_MIME, JSON.stringify(payload));
-    e.dataTransfer.setData('text/uri-list', bookmark.url);
-    e.dataTransfer.setData('text/plain', bookmark.url);
-    e.dataTransfer.effectAllowed = 'move';
+    setBookmarkDrag(e.dataTransfer, {
+      wsId,
+      pageId,
+      widgetId,
+      bookmarkId: bookmark.id,
+      url: bookmark.url,
+      title: bookmark.title,
+    });
   };
 
   return (

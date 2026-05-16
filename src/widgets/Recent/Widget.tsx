@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import type { Widget, RecentConfig } from '@/types';
 import { useAppStore } from '@/store/appStore';
+import { useUiStore } from '@/store/uiStore';
 import { getRecentlyClosed, restoreSession, type RecentItem } from '@/lib/chromeApi';
 import { faviconUrl } from '@/lib/favicon';
+import { setLinkDrag } from '@/lib/dnd';
 
 interface Props {
   widget: Widget;
@@ -12,6 +14,7 @@ interface Props {
 
 export function RecentWidget({ widget }: Props) {
   const cfg = widget.config as RecentConfig;
+  const editMode = useUiStore((s) => s.editMode);
   const [items, setItems] = useState<RecentItem[]>([]);
 
   const load = useCallback(() => {
@@ -41,7 +44,15 @@ export function RecentWidget({ widget }: Props) {
           {items.map((it) => (
             <button
               key={it.id}
-              className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-bg-soft/60 text-left"
+              draggable={editMode}
+              onDragStart={(e) => {
+                if (!editMode) return;
+                setLinkDrag(e.dataTransfer, { url: it.url, title: it.title || it.url });
+              }}
+              className={
+                'flex items-center gap-2 px-2 py-1.5 rounded hover:bg-bg-soft/60 text-left' +
+                (editMode ? ' cursor-grab active:cursor-grabbing' : '')
+              }
               onClick={() => {
                 if (it.sessionId) {
                   void restoreSession(it.sessionId);
@@ -50,7 +61,7 @@ export function RecentWidget({ widget }: Props) {
                 }
               }}
             >
-              <img src={faviconUrl(it.url, 16)} alt="" className="w-4 h-4 shrink-0" loading="lazy" />
+              <img src={faviconUrl(it.url, 16)} alt="" className="w-4 h-4 shrink-0" loading="lazy" draggable={false} />
               <span className="text-sm truncate">{it.title}</span>
             </button>
           ))}

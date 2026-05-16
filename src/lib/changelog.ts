@@ -25,6 +25,18 @@ export interface ChangelogEntry {
  */
 export const changelog: ChangelogEntry[] = [
   {
+    version: '0.2.1',
+    date: '2026-05-16',
+    ru: [
+      'Перетаскивание ссылок из виджетов «Часто посещаемые» и «Недавние» в виджет «Закладки» (в режиме полного редактирования).',
+      'Дубликаты по URL при перетаскивании игнорируются.',
+    ],
+    en: [
+      'Drag links from TopSites and Recent widgets into a Bookmarks widget (in full edit mode).',
+      'Drops are deduplicated by URL.',
+    ],
+  },
+  {
     version: '0.2.0',
     date: '2026-05-16',
     ru: [
@@ -49,7 +61,7 @@ export const changelog: ChangelogEntry[] = [
 ];
 
 /** Current app version, kept in sync with package.json at build time. */
-export const APP_VERSION = '0.2.0';
+export const APP_VERSION = '0.2.1';
 
 /**
  * Compare two semver-ish strings. Returns >0 if a>b, <0 if a<b, 0 if equal.

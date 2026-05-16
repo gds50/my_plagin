@@ -9,6 +9,24 @@
 
 ---
 
+## [0.2.1] — 2026-05-16
+
+### Добавлено / Added
+
+- Перетаскивание ссылок из виджетов **«Часто посещаемые»** (TopSites) и
+  **«Недавние»** (Recent) в виджет **«Закладки»**. Работает в режиме
+  полного редактирования. Дубликаты по URL игнорируются.
+  *Drag links from **TopSites** and **Recent** widgets into **Bookmarks**.
+  Works in full edit mode. URL-based deduplication.*
+
+### Изменено / Changed
+
+- Внутренний рефакторинг: общий контракт DnD вынесен в `src/lib/dnd.ts`
+  (типы `BookmarkDragPayload`, `LinkDragPayload`, MIME-константы).
+  *Internal: shared DnD contract moved to `src/lib/dnd.ts`.*
+
+---
+
 ## [0.2.0] — 2026-05-16
 
 ### Добавлено / Added

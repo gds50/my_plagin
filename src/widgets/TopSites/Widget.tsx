@@ -4,6 +4,7 @@ import { useAppStore } from '@/store/appStore';
 import { getTopSites } from '@/lib/chromeApi';
 import { faviconUrl } from '@/lib/favicon';
 import { useUiStore } from '@/store/uiStore';
+import { setLinkDrag } from '@/lib/dnd';
 
 interface Props {
   widget: Widget;
@@ -48,9 +49,17 @@ export function TopSitesWidget({ widget, wsId, pageId }: Props) {
             <div key={s.url} className="group relative">
               <a
                 href={s.url}
-                className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-bg-soft/60 text-center"
+                draggable={editMode}
+                onDragStart={(e) => {
+                  if (!editMode) return;
+                  setLinkDrag(e.dataTransfer, { url: s.url, title: s.title || s.url });
+                }}
+                className={
+                  'flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-bg-soft/60 text-center' +
+                  (editMode ? ' cursor-grab active:cursor-grabbing' : '')
+                }
               >
-                <img src={faviconUrl(s.url, 32)} alt="" className="w-8 h-8" loading="lazy" />
+                <img src={faviconUrl(s.url, 32)} alt="" className="w-8 h-8" loading="lazy" draggable={false} />
                 <span className="text-[10px] truncate w-full">{s.title || s.url}</span>
               </a>
               {editMode && (
