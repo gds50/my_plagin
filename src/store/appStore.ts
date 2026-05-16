@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import type {
   AppData,
+  Bookmark,
+  BookmarksConfig,
   Page,
   Settings,
   Widget,
@@ -46,6 +48,16 @@ interface Store {
     pageId: string,
     widgetId: string,
     position: Widget['position'],
+  ) => Promise<void>;
+
+  /**
+   * Move a bookmark from one bookmarks-widget to another (possibly across
+   * workspaces / pages). No-op if either widget is missing or not of type
+   * 'bookmarks', or if src === dst.
+   */
+  moveBookmark: (
+    src: { wsId: string; pageId: string; widgetId: string; bookmarkId: string },
+    dst: { wsId: string; pageId: string; widgetId: string },
   ) => Promise<void>;
 }
 
@@ -307,6 +319,62 @@ export const useAppStore = create<Store>((set, get) => ({
 
   moveWidget: async (wsId, pageId, widgetId, position) => {
     await get().updateWidget(wsId, pageId, widgetId, { position });
+  },
+
+  moveBookmark: async (src, dst) => {
+    if (src.widgetId === dst.widgetId) return;
+    const cur = get().data;
+
+    // Locate source widget and bookmark
+    let bookmark: Bookmark | undefined;
+    const findBookmarks = (wsId: string, pageId: string, widgetId: string) => {
+      const ws = cur.workspaces.find((w) => w.id === wsId);
+      const page = ws?.pages.find((p) => p.id === pageId);
+      const widget = page?.widgets.find((w) => w.id === widgetId);
+      if (!widget || widget.type !== 'bookmarks') return null;
+      return widget.config as BookmarksConfig;
+    };
+
+    const srcCfg = findBookmarks(src.wsId, src.pageId, src.widgetId);
+    const dstCfg = findBookmarks(dst.wsId, dst.pageId, dst.widgetId);
+    if (!srcCfg || !dstCfg) return;
+    bookmark = srcCfg.items.find((i) => i.id === src.bookmarkId);
+    if (!bookmark) return;
+    // Avoid duplicates if the bookmark id already exists in the destination
+    if (dstCfg.items.some((i) => i.id === bookmark!.id)) return;
+
+    const data: AppData = {
+      ...cur,
+      workspaces: cur.workspaces.map((w) => ({
+        ...w,
+        pages: w.pages.map((p) => ({
+          ...p,
+          widgets: p.widgets.map((wd) => {
+            if (wd.type !== 'bookmarks') return wd;
+            if (wd.id === src.widgetId) {
+              const cfg = wd.config as BookmarksConfig;
+              return {
+                ...wd,
+                config: {
+                  ...cfg,
+                  items: cfg.items.filter((i) => i.id !== src.bookmarkId),
+                },
+              } as Widget;
+            }
+            if (wd.id === dst.widgetId) {
+              const cfg = wd.config as BookmarksConfig;
+              return {
+                ...wd,
+                config: { ...cfg, items: [...cfg.items, bookmark!] },
+              } as Widget;
+            }
+            return wd;
+          }),
+        })),
+      })),
+    };
+    set({ data });
+    await persist(data);
   },
 }));
 

@@ -30,6 +30,9 @@ export default defineManifest({
     'downloads',
   ],
   host_permissions: ['https://api.github.com/*'],
+  // Requested on-demand (per-origin) when the user clicks "fetch title" for a
+  // bookmark URL. Chrome will show a permission prompt scoped to that origin.
+  optional_host_permissions: ['*://*/*'],
   // Allow access to chrome://favicon/ via the new favicon API
   web_accessible_resources: [
     {
