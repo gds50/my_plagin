@@ -157,9 +157,7 @@ export function BookmarksWidget({ widget, wsId, pageId }: Props) {
         <div
           className={cn(
             'flex-1 overflow-auto',
-            cfg.layout === 'grid'
-              ? 'flex flex-wrap content-start gap-2'
-              : 'flex flex-col gap-1',
+            cfg.layout === 'grid' ? 'grid grid-cols-5 gap-2' : 'flex flex-col gap-1',
           )}
         >
           {cfg.items.map((b) => (
@@ -225,15 +223,7 @@ function BookmarkItem({
   };
 
   return (
-    <div
-      className={cn(
-        'group relative',
-        // In grid layout each tile is sized to its content (icon + label),
-        // but bounded so it stays roughly square when the label is short
-        // and never blows up wider than ~half the container.
-        layout === 'grid' && 'min-w-[64px] max-w-[calc(50%-0.25rem)]',
-      )}
-    >
+    <div className="group relative min-w-0">
       <a
         href={bookmark.url}
         draggable={draggable}
@@ -264,7 +254,7 @@ function BookmarkItem({
         <span
           className={cn(
             layout === 'grid'
-              ? 'text-xs leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-full'
+              ? 'text-[10px] leading-tight text-center w-full line-clamp-2 break-words'
               : 'truncate',
           )}
         >

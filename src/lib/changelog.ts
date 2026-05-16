@@ -25,6 +25,16 @@ export interface ChangelogEntry {
  */
 export const changelog: ChangelogEntry[] = [
   {
+    version: '0.2.3',
+    date: '2026-05-16',
+    ru: [
+      '«Закладки» (grid): 5 иконок в ряд, подпись в 2 строки с обрезкой остального.',
+    ],
+    en: [
+      'Bookmarks (grid): 5 tiles per row, label clamped to 2 lines (overflow hidden).',
+    ],
+  },
+  {
     version: '0.2.2',
     date: '2026-05-16',
     ru: [
@@ -73,7 +83,7 @@ export const changelog: ChangelogEntry[] = [
 ];
 
 /** Current app version, kept in sync with package.json at build time. */
-export const APP_VERSION = '0.2.2';
+export const APP_VERSION = '0.2.3';
 
 /**
  * Compare two semver-ish strings. Returns >0 if a>b, <0 if a<b, 0 if equal.

@@ -9,6 +9,17 @@
 
 ---
 
+## [0.2.3] — 2026-05-16
+
+### Изменено / Changed
+
+- **«Закладки»** (grid): фиксированные 5 колонок (чуть уже, чем в TopSites),
+  подпись ограничена двумя строками (line-clamp-2), всё сверх обрезается.
+  *Bookmarks (grid): fixed 5-column layout (narrower than TopSites),
+  label clamped to 2 lines, the rest is hidden.*
+
+---
+
 ## [0.2.2] — 2026-05-16
 
 ### Изменено / Changed
