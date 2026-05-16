@@ -141,3 +141,23 @@ export function subscribeAppData(cb: (data: AppData) => void): () => void {
 }
 
 export const STORAGE_KEYS = { app: STORAGE_KEY };
+
+// ---------------------------------------------------------------------------
+// Meta storage — small per-device key/value pairs that should NOT be synced
+// to Gist (e.g. "last seen app version" for the What's-new modal).
+// ---------------------------------------------------------------------------
+
+const META_KEY = 'mystart.meta.v1';
+
+interface MetaShape {
+  lastSeenVersion?: string;
+}
+
+export async function getMeta(): Promise<MetaShape> {
+  return (await rawGet<MetaShape>(META_KEY)) ?? {};
+}
+
+export async function patchMeta(patch: Partial<MetaShape>): Promise<void> {
+  const cur = await getMeta();
+  await rawSet(META_KEY, { ...cur, ...patch });
+}

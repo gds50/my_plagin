@@ -7,6 +7,7 @@ import { CommandPalette } from '@/components/CommandPalette';
 import { AddWidgetModal } from '@/components/AddWidgetModal';
 import { Toast } from '@/components/Toast';
 import { ThemeApplier } from '@/components/ThemeApplier';
+import { WhatsNewModal } from '@/components/WhatsNewModal';
 import { initSyncWatcher, syncPullNow } from '@/lib/sync';
 
 export function App() {
@@ -61,6 +62,7 @@ export function App() {
       </div>
       <CommandPalette />
       <AddWidgetModal open={addOpen} onClose={() => setAddOpen(false)} />
+      <WhatsNewModal />
       <Toast />
     </>
   );

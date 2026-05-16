@@ -213,7 +213,49 @@ TS 6.x). Import as `@/lib/...`, never `../../lib/...` from deep nesting.
 - Extension icons 16/32/48/128 (currently default Chrome icon)
 - Optional unsplash backgrounds with rotation
 
-## 13. When in doubt
+## 13. Versioning & releases (MANDATORY for every user-visible change)
+
+This project follows [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
+
+- `PATCH` — bug fixes, internal refactors with no user-visible behavior change.
+- `MINOR` — new features, new widgets, new settings (backward-compatible).
+- `MAJOR` — breaking changes to the data model (`AppData` schema) or removal of features.
+
+### Release checklist — do ALL of these in the same commit/PR
+
+1. **Bump `version` in `package.json`.** The Chrome manifest version is generated from
+   `package.json` (`src/manifest.config.ts` uses `pkg.version`), so this single bump propagates
+   to the manifest.
+2. **Update `APP_VERSION` in `src/lib/changelog.ts`** to match.
+3. **Prepend a new entry at the TOP of the `changelog` array** in `src/lib/changelog.ts` with:
+   - `version` (must equal new `APP_VERSION`)
+   - `date` (ISO `YYYY-MM-DD`)
+   - `ru` — bullet points in Russian (primary, mandatory)
+   - `en` — bullet points in English (mandatory)
+   - Keep bullets short and user-facing. No internal refactors that the user can't see.
+4. **Mirror the same entry in `CHANGELOG.md`** (the human-readable source of truth, bilingual,
+   Russian section first per repo convention).
+5. **If the `AppData` schema changed:** bump `DATA_VERSION` in `src/types/index.ts` and add a
+   migration branch in `loadAppData()` in `src/lib/storage.ts`. NEVER silently change the
+   schema — old installs must keep loading.
+6. **Never edit historical changelog entries** (in either file). Only append at the top.
+
+### How the user sees updates
+
+On every newtab load, `WhatsNewModal` (`src/components/WhatsNewModal.tsx`) compares
+`APP_VERSION` from the bundle against `lastSeenVersion` stored in `chrome.storage.local`
+under key `mystart.meta.v1` (separate from `AppData` — NOT synced to Gist). If newer entries
+exist, it shows a modal listing them; on dismiss it persists the new version. Fresh installs
+record the version silently and don't see the modal (avoid greeting new users with history).
+
+### Meta storage rules
+
+- `mystart.meta.v1` (helpers: `getMeta()` / `patchMeta()` in `src/lib/storage.ts`) is for
+  per-device state that **must not** sync via Gist (last-seen version, future per-device flags).
+- `mystart.data.v1` (`AppData`) is the syncable user data — keep it small and portable.
+- When adding a new meta field, extend the `MetaShape` interface in `storage.ts`.
+
+## 14. When in doubt
 
 1. Ask the owner in Russian, briefly.
 2. Show 2 options, pick a recommended default, justify.

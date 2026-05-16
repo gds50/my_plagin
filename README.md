@@ -39,6 +39,51 @@ npm run build
 
 > **Не нужен** аккаунт разработчика Google, не нужна оплата $5, не нужна модерация.
 
+### Обновление установленного расширения
+
+MyStart — это распакованное расширение, поэтому Chrome **не обновляет его сам**.
+Обновление = пересборка `dist/` и перезагрузка в `chrome://extensions`.
+
+**macOS / Linux:**
+```bash
+cd my_plagin
+git pull
+npm install        # на случай новых зависимостей
+npm run build
+```
+
+**Windows (PowerShell или Git Bash):**
+```powershell
+cd C:\path\to\my_plagin
+git pull
+npm install
+npm run build
+```
+
+> Если на Windows ещё не установлены Node.js и Git — поставьте
+> [Node.js LTS](https://nodejs.org/) и [Git for Windows](https://git-scm.com/download/win)
+> (обычным инсталлятором, всё по умолчанию).
+
+После сборки **в Chrome:**
+1. Откройте `chrome://extensions`.
+2. Найдите карточку **MyStart**.
+3. Нажмите круглую стрелку **«Обновить»** (значок 🔄) на карточке расширения —
+   либо переключите тумблер расширения выкл/вкл.
+4. Откройте новую вкладку — появится окно **«Что нового»** со списком изменений.
+
+> ⚠️ Если вы клонировали репозиторий не через `git clone`, а скачали как ZIP,
+> просто перетащите содержимое нового ZIP поверх старой папки, затем выполните
+> `npm install && npm run build` и обновите расширение в Chrome.
+
+### Версионирование и «Что нового»
+
+- Версия проекта живёт в [`package.json`](package.json) и автоматически попадает в манифест расширения.
+- При каждом обновлении список изменений показывается в окне «Что нового» —
+  по нажатию «Понятно» текущая версия запоминается, чтобы не показывать список повторно.
+- Полная история изменений: [`CHANGELOG.md`](CHANGELOG.md).
+- Свежие установки видят окно «Что нового» только **после первого обновления**,
+  чтобы не пугать новых пользователей историей.
+
 ### Разработка с hot-reload
 
 ```bash
@@ -176,6 +221,41 @@ npm run dev
 ```
 
 Vite + `@crxjs/vite-plugin` serves the extension with hot reload. After the first run, load `dist/` into Chrome the same way as above; it auto-updates while `npm run dev` is running.
+
+### Updating an installed extension
+
+MyStart is loaded unpacked, so Chrome **does not auto-update it**. Updating
+means rebuilding `dist/` and reloading it in `chrome://extensions`.
+
+**macOS / Linux:**
+```bash
+cd my_plagin
+git pull
+npm install
+npm run build
+```
+
+**Windows (PowerShell or Git Bash):**
+```powershell
+cd C:\path\to\my_plagin
+git pull
+npm install
+npm run build
+```
+
+Then in Chrome:
+1. Open `chrome://extensions`.
+2. Find the **MyStart** card.
+3. Click the round **Reload** arrow (🔄) on the card — or toggle the extension off/on.
+4. Open a new tab — a **What's new** dialog will list the changes.
+
+### Versioning & "What's new"
+
+- The project version lives in [`package.json`](package.json) and is propagated to the Chrome manifest automatically.
+- After every update, a "What's new" modal shows the changes; pressing "Понятно/OK" persists the seen version so it won't show again.
+- Full history: [`CHANGELOG.md`](CHANGELOG.md).
+- Fresh installs see the modal **only after their first update**, never on day one.
+
 
 ### `npm audit` warning — safe to ignore
 
