@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { Widget, SearchConfig } from '@/types';
 import { useAppStore } from '@/store/appStore';
 import { DEFAULT_ENGINES, resolveQuery } from '@/lib/search-engines';
@@ -12,8 +12,17 @@ interface Props {
 
 export function SearchWidget({ widget }: Props) {
   const cfg = widget.config as SearchConfig;
+  // Global setting takes priority over per-widget config so that
+  // changing the engine in Options/⋯ menu is immediately reflected here.
+  const globalDefault = useAppStore((s) => s.data.settings.defaultSearchEngine);
   const [q, setQ] = useState('');
-  const [engineKey, setEngineKey] = useState(cfg.defaultEngine);
+  const [engineKey, setEngineKey] = useState(globalDefault || cfg.defaultEngine);
+
+  // Keep in sync if the global setting changes while the tab is open
+  // (e.g. after a Gist pull or theme/settings change in another tab).
+  useEffect(() => {
+    if (globalDefault) setEngineKey(globalDefault);
+  }, [globalDefault]);
 
   const preview = useMemo(() => resolveQuery(q, DEFAULT_ENGINES, engineKey), [q, engineKey]);
 

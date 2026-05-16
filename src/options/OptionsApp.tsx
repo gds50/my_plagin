@@ -6,6 +6,7 @@ import { Toast } from '@/components/Toast';
 import { setGistToken, clearGistToken, hasToken, testGist } from '@/lib/gist';
 import { syncPushNow, syncPullNow } from '@/lib/sync';
 import { exportAppData, importAppDataFromFile } from '@/lib/backup';
+import { DEFAULT_ENGINES } from '@/lib/search-engines';
 import type { ThemeMode } from '@/types';
 
 export function OptionsApp() {
@@ -259,12 +260,18 @@ export function OptionsApp() {
         </Section>
 
         <Section title="Поиск">
-          <Field label="Поисковик по умолчанию (key)">
-            <input
+          <Field label="Поисковик по умолчанию">
+            <select
               className="input"
               value={data.settings.defaultSearchEngine}
               onChange={(e) => patchSettings({ defaultSearchEngine: e.target.value })}
-            />
+            >
+              {DEFAULT_ENGINES.map((e) => (
+                <option key={e.key} value={e.key}>
+                  {e.name}
+                </option>
+              ))}
+            </select>
           </Field>
         </Section>
       </div>
