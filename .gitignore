@@ -14,3 +14,7 @@ dist-zip
 secrets.json
 **/secrets.local.*
 .gist-token
+
+
+# TypeScript incremental build cache
+*.tsbuildinfo
