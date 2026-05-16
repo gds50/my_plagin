@@ -25,6 +25,18 @@ export interface ChangelogEntry {
  */
 export const changelog: ChangelogEntry[] = [
   {
+    version: '0.2.2',
+    date: '2026-05-16',
+    ru: [
+      'Резиновая сетка в виджете «Закладки» (вариант grid): плитки подстраиваются под ширину виджета и длину подписи, в ряду помещается 2/3/4… элементов.',
+      'Короткая подпись → плитка почти квадратная; длинная → расширяется, но не больше половины виджета.',
+    ],
+    en: [
+      'Bookmarks widget (grid layout) is now responsive: tiles adapt to widget width and label length; 2/3/4… per row.',
+      'Short label → near-square tile; long label → wider, but capped at ~half the widget.',
+    ],
+  },
+  {
     version: '0.2.1',
     date: '2026-05-16',
     ru: [
@@ -61,7 +73,7 @@ export const changelog: ChangelogEntry[] = [
 ];
 
 /** Current app version, kept in sync with package.json at build time. */
-export const APP_VERSION = '0.2.1';
+export const APP_VERSION = '0.2.2';
 
 /**
  * Compare two semver-ish strings. Returns >0 if a>b, <0 if a<b, 0 if equal.

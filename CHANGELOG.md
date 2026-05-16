@@ -9,6 +9,22 @@
 
 ---
 
+## [0.2.2] — 2026-05-16
+
+### Изменено / Changed
+
+- **«Закладки»** (grid): плитки теперь резиновые. Размер плитки
+  зависит от длины подписи: короткая — почти квадрат, длинная —
+  расширяется. В ряду помещается 2/3/4… элементов в зависимости от
+  ширины виджета. Максимум для одной плитки — половина виджета,
+  чтобы одной иконкой не занимался весь блок. Высота плитки стабильна.
+  *Bookmarks (grid): responsive tiles. Tile size follows the label —
+  short label = near-square, long label = wider. 2/3/4… per row
+  depending on widget width. A single tile is capped at half the widget
+  to prevent one icon from filling the whole block. Height stays stable.*
+
+---
+
 ## [0.2.1] — 2026-05-16
 
 ### Добавлено / Added
