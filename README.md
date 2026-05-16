@@ -47,6 +47,22 @@ npm run dev
 
 Vite + `@crxjs/vite-plugin` автоматически пересобирают расширение при изменениях. Загрузите `dist/` в Chrome один раз — дальше оно само обновляется, пока запущен `npm run dev`.
 
+### Предупреждение `npm audit` — это нормально
+
+После `npm install` вы увидите примерно такое сообщение:
+
+```
+4 vulnerabilities (2 moderate, 2 high)
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+```
+
+**Это нормально, ничего делать не нужно.** Уязвимости находятся в `esbuild` и `rollup` — это инструменты, которыми проект собирается у вас на компьютере. В готовую папку `dist/`, которая загружается в Chrome, они **не попадают**, поэтому для конечного расширения риск равен нулю.
+
+⚠️ **Никогда не запускайте `npm audit fix --force`** в этом проекте. Эта команда понизит `@crxjs/vite-plugin` с версии 2 до версии 1 и сломает сборку (у нас манифест написан под v2 API). Если случайно запустили — откатите изменения: `git checkout -- package.json package-lock.json && npm install`.
+
+Если запущен `npm run dev`, желательно не открывать в это же время недоверенные сайты в браузере — это единственная реальная митигация для dev-уязвимости esbuild.
+
 ### Использование
 
 **Режим редактирования:** в верхней панели нажмите «Редактировать» → можно таскать виджеты, менять размер (правый нижний угол) и удалять. Кнопка «+ Виджет» добавляет новый.
@@ -160,6 +176,22 @@ npm run dev
 ```
 
 Vite + `@crxjs/vite-plugin` serves the extension with hot reload. After the first run, load `dist/` into Chrome the same way as above; it auto-updates while `npm run dev` is running.
+
+### `npm audit` warning — safe to ignore
+
+After `npm install` you will see something like:
+
+```
+4 vulnerabilities (2 moderate, 2 high)
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+```
+
+**This is expected and safe.** The vulnerabilities are in `esbuild` and `rollup` — build-time tools that run only on your machine. They are **not** included in `dist/`, so the installed extension is unaffected.
+
+⚠️ **Do NOT run `npm audit fix --force`** in this project. It will downgrade `@crxjs/vite-plugin` from v2 to v1 and break the build (our manifest config targets the v2 API). If you ran it by mistake, revert with: `git checkout -- package.json package-lock.json && npm install`.
+
+While `npm run dev` is running, avoid browsing untrusted sites in the same browser — that's the only real mitigation for the esbuild dev-server advisory.
 
 ### GitHub Gist sync
 
