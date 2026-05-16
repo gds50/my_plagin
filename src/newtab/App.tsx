@@ -54,9 +54,9 @@ export function App() {
   return (
     <>
       <ThemeApplier />
-      <div className="min-h-screen flex flex-col">
+      <div className="h-screen overflow-hidden flex flex-col">
         <TopBar onOpenAddWidget={() => setAddOpen(true)} />
-        <main className="flex-1 p-4">
+        <main className="flex-1 overflow-hidden p-2">
           <Grid />
         </main>
       </div>

@@ -25,6 +25,22 @@ export interface ChangelogEntry {
  */
 export const changelog: ChangelogEntry[] = [
   {
+    version: '0.3.0',
+    date: '2026-05-16',
+    ru: [
+      'Страница теперь вписывается в одно окно без прокрутки вниз и вправо.',
+      'Сетка виджетов автоматически подстраивается под размер экрана: позиции синхронизируются, а физический размер строки рассчитывается локально под конкретный монитор.',
+      'Переключатель темы (Тёмная / Светлая / Авто) вынесен в меню «⋯» на главной странице — без перехода в настройки.',
+      'Кнопка «⌘K» убрана из шапки (вызов командной строки по-прежнему работает клавишами Ctrl/Cmd+K).',
+    ],
+    en: [
+      'Dashboard now fits in a single window — no vertical or horizontal scroll.',
+      'Widget grid adapts to the local screen: positions sync via Gist, but row height is computed locally per monitor.',
+      'Theme switcher (Dark / Light / Auto) is now in the «⋯» menu on the main page — no need to open Settings.',
+      'Removed the «⌘K» button from the top bar (keyboard shortcut Ctrl/Cmd+K still works).',
+    ],
+  },
+  {
     version: '0.2.4',
     date: '2026-05-16',
     ru: [
@@ -95,7 +111,7 @@ export const changelog: ChangelogEntry[] = [
 ];
 
 /** Current app version, kept in sync with package.json at build time. */
-export const APP_VERSION = '0.2.4';
+export const APP_VERSION = '0.3.0';
 
 /**
  * Compare two semver-ish strings. Returns >0 if a>b, <0 if a<b, 0 if equal.

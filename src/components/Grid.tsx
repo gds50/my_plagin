@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Widget } from '@/types';
 import { useAppStore, selectActivePage, selectActiveWorkspace } from '@/store/appStore';
 import { useUiStore } from '@/store/uiStore';
@@ -7,8 +7,8 @@ import { renderWidget } from '@/widgets/_registry';
 import { cn } from '@/lib/cn';
 
 const COLS = 12;
-const ROW_HEIGHT = 60; // px per row unit
-const GAP = 12;
+const GAP = 8; // px gap between cells
+const MIN_ROW_HEIGHT = 36; // px — floor for tiny screens
 
 interface DragState {
   widgetId: string;
@@ -16,6 +16,8 @@ interface DragState {
   startMouse: { x: number; y: number };
   startPos: Widget['position'];
   containerRect: DOMRect;
+  /** rowHeight captured at drag start, so resize calc stays consistent */
+  rowHeight: number;
 }
 
 export function Grid() {
@@ -26,14 +28,33 @@ export function Grid() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<DragState | null>(null);
   const [previewPos, setPreviewPos] = useState<Widget['position'] | null>(null);
+  const [containerHeight, setContainerHeight] = useState(0);
 
   const widgets = page?.widgets ?? [];
 
   const maxRow = useMemo(() => {
     let m = 0;
     for (const w of widgets) m = Math.max(m, w.position.y + w.position.h);
-    return Math.max(m, 12);
+    return Math.max(m, 8);
   }, [widgets]);
+
+  // Observe container height so rowHeight adapts to the local screen size.
+  // This means the grid always fills the viewport regardless of monitor resolution —
+  // widget positions (grid units) sync, but the physical pixel size per row is local.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      setContainerHeight(entry.contentRect.height);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const rowHeight = useMemo(() => {
+    if (!containerHeight || !maxRow) return 60;
+    return Math.max(MIN_ROW_HEIGHT, (containerHeight - GAP * (maxRow + 1)) / maxRow);
+  }, [containerHeight, maxRow]);
 
   if (!ws || !page) return null;
 
@@ -52,6 +73,7 @@ export function Grid() {
       startMouse: { x: e.clientX, y: e.clientY },
       startPos: { ...widget.position },
       containerRect: containerRef.current.getBoundingClientRect(),
+      rowHeight,
     });
     setPreviewPos({ ...widget.position });
   };
@@ -62,7 +84,7 @@ export function Grid() {
     const dx = e.clientX - drag.startMouse.x;
     const dy = e.clientY - drag.startMouse.y;
     const dCol = Math.round(dx / (colWidth + GAP));
-    const dRow = Math.round(dy / (ROW_HEIGHT + GAP));
+    const dRow = Math.round(dy / (drag.rowHeight + GAP));
 
     let { x, y, w, h } = drag.startPos;
     if (drag.mode === 'move') {
@@ -87,12 +109,9 @@ export function Grid() {
     <div
       ref={containerRef}
       className={cn(
-        'relative w-full',
+        'relative w-full h-full',
         editMode && 'grid-bg rounded-xl p-2',
       )}
-      style={{
-        minHeight: maxRow * (ROW_HEIGHT + GAP) + GAP,
-      }}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
@@ -110,9 +129,9 @@ export function Grid() {
             )}
             style={{
               left: `calc((${colWidth} + ${GAP}px) * ${pos.x})`,
-              top: pos.y * (ROW_HEIGHT + GAP),
+              top: pos.y * (rowHeight + GAP),
               width: `calc(${colWidth} * ${pos.w} + ${GAP * (pos.w - 1)}px)`,
-              height: pos.h * ROW_HEIGHT + (pos.h - 1) * GAP,
+              height: pos.h * rowHeight + (pos.h - 1) * GAP,
             }}
           >
             <WidgetFrame

@@ -9,6 +9,36 @@
 
 ---
 
+## [0.3.0] — 2026-05-16
+
+### Добавлено / Added
+
+- **Без прокрутки**: страница теперь вписывается ровно в одно окно браузера.
+  Прокрутка вниз и вправо полностью отсутствует.
+  *No scroll: the dashboard now fits exactly in one browser window — no vertical or horizontal scroll.*
+
+- **Адаптивная сетка под экран**: высота строки сетки рассчитывается локально
+  исходя из реального размера окна (через ResizeObserver). Позиции виджетов
+  (в сеточных единицах) синхронизируются через Gist, а физический размер строки
+  в пикселях подбирается индивидуально под каждый монитор. Большой монитор дома
+  — строка выше; ноутбук в офисе — строка ниже. Ничего не "уезжает".
+  *Adaptive grid per screen: row height is computed locally from the actual window size.
+  Widget positions (grid units) sync via Gist; pixel row height adapts per monitor.
+  Big monitor at home → taller rows; laptop → shorter rows. Nothing shifts.*
+
+- **Тема в главном меню**: переключатель «Тёмная / Светлая / Авто» теперь
+  доступен прямо из меню «⋯» на главной вкладке — без перехода в Настройки.
+  *Theme in main menu: Dark / Light / Auto switcher is now in the «⋯» menu on
+  the dashboard, no need to open the Settings page.*
+
+### Изменено / Changed
+
+- Кнопка «⌘K» убрана из шапки (клавиши Ctrl/Cmd+K продолжают открывать
+  командную строку).
+  *The «⌘K» button is removed from the top bar (Ctrl/Cmd+K keyboard shortcut still works).*
+
+---
+
 ## [0.2.4] — 2026-05-16
 
 ### Исправлено / Fixed

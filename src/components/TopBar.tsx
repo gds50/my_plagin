@@ -4,6 +4,7 @@ import { useUiStore } from '@/store/uiStore';
 import { Modal } from './Modal';
 import { exportAppData, importAppDataFromFile } from '@/lib/backup';
 import { cn } from '@/lib/cn';
+import type { ThemeMode } from '@/types';
 
 export function TopBar({ onOpenAddWidget }: { onOpenAddWidget: () => void }) {
   const data = useAppStore((s) => s.data);
@@ -13,10 +14,10 @@ export function TopBar({ onOpenAddWidget }: { onOpenAddWidget: () => void }) {
   const addPage = useAppStore((s) => s.addPage);
   const addWorkspace = useAppStore((s) => s.addWorkspace);
   const replaceAll = useAppStore((s) => s.replaceAll);
+  const patchSettings = useAppStore((s) => s.patchSettings);
 
   const editMode = useUiStore((s) => s.editMode);
   const toggleEdit = useUiStore((s) => s.toggleEdit);
-  const openCommand = useUiStore((s) => s.openCommand);
   const notify = useUiStore((s) => s.notify);
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -101,9 +102,6 @@ export function TopBar({ onOpenAddWidget }: { onOpenAddWidget: () => void }) {
 
       <div className="flex-1" />
 
-      <button className="btn btn-ghost text-sm" onClick={openCommand} title="Cmd/Ctrl+K">
-        ⌘K
-      </button>
       {editMode && (
         <button className="btn btn-primary text-sm" onClick={onOpenAddWidget}>
           + Виджет
@@ -119,16 +117,40 @@ export function TopBar({ onOpenAddWidget }: { onOpenAddWidget: () => void }) {
         ⋯
       </button>
 
-      <Modal open={menuOpen} onClose={() => setMenuOpen(false)} title="Меню">
+      <Modal open={menuOpen} onClose={() => setMenuOpen(false)} title="Настройки">
         <div className="space-y-2">
+          {/* Theme toggle */}
+          <div className="pb-2 mb-2 border-b border-border/40">
+            <p className="text-xs text-fg-muted mb-2">Тема оформления</p>
+            <div className="flex gap-1">
+              {(['dark', 'light', 'auto'] as ThemeMode[]).map((t) => (
+                <button
+                  key={t}
+                  className={cn(
+                    'btn btn-ghost text-xs flex-1',
+                    data.settings.theme === t && 'bg-bg-soft border-border/70',
+                  )}
+                  onClick={() => patchSettings({ theme: t })}
+                >
+                  {t === 'dark' ? '🌙 Тёмная' : t === 'light' ? '☀️ Светлая' : '🖥 Авто'}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <button className="btn w-full" onClick={() => { setMenuOpen(false); exportAppData(data); }}>
             ⬇ Экспорт в JSON
           </button>
           <button className="btn w-full" onClick={() => { setMenuOpen(false); onImport(); }}>
             ⬆ Импорт из JSON
           </button>
-          <a className="btn w-full" href={chrome?.runtime?.getURL?.('src/options/index.html') ?? '#'} target="_blank" rel="noreferrer">
-            ⚙ Настройки и синхронизация
+          <a
+            className="btn w-full"
+            href={chrome?.runtime?.getURL?.('src/options/index.html') ?? '#'}
+            target="_blank"
+            rel="noreferrer"
+          >
+            ⚙ Синхронизация и все настройки
           </a>
         </div>
       </Modal>
