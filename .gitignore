@@ -1,0 +1,16 @@
+node_modules
+dist
+dist-zip
+.DS_Store
+*.log
+.vite
+.env
+.env.local
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# user secrets – never commit
+secrets.json
+**/secrets.local.*
+.gist-token
