@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '@/lib/cn';
 
 interface ModalProps {
@@ -28,7 +29,7 @@ export function Modal({ open, onClose, title, children, className, size = 'md' }
     lg: 'max-w-2xl',
   };
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-[10vh]"
       onMouseDown={(e) => {
@@ -46,6 +47,7 @@ export function Modal({ open, onClose, title, children, className, size = 'md' }
         )}
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
