@@ -1,6 +1,8 @@
 // Fetch and extract a page <title> for the given URL.
-// Requests host permission on demand via chrome.permissions API so the user
-// stays in control. Returns null when permission is denied or fetch fails.
+// Requests blanket host permission (*://*/*) once via chrome.permissions API
+// so the user is asked only one time regardless of how many sites they use.
+// Handles non-UTF-8 pages (e.g. windows-1251 on Russian sites) by reading
+// the raw bytes and detecting charset from HTTP headers or <meta> tags.
 
 const hasChrome = typeof chrome !== 'undefined';
 
@@ -15,19 +17,47 @@ function normalizeUrl(input: string): string | null {
   }
 }
 
-export async function ensureHostPermission(url: string): Promise<boolean> {
-  const normalized = normalizeUrl(url);
-  if (!normalized) return false;
+// Request *://*/* once — covers every site, so the user sees the dialog at most once.
+const WILDCARD_ORIGIN = '*://*/*';
+
+export async function ensureHostPermission(_url: string): Promise<boolean> {
   if (!hasChrome || !chrome.permissions) return true; // dev mode
-  const u = new URL(normalized);
-  const origin = `${u.protocol}//${u.hostname}/*`;
   try {
-    const has = await chrome.permissions.contains({ origins: [origin] });
-    if (has) return true;
-    return await chrome.permissions.request({ origins: [origin] });
+    const hasAll = await chrome.permissions.contains({ origins: [WILDCARD_ORIGIN] });
+    if (hasAll) return true;
+    // Ask once for all origins — subsequent calls skip straight to hasAll=true.
+    return await chrome.permissions.request({ origins: [WILDCARD_ORIGIN] });
   } catch {
     return false;
   }
+}
+
+/** Decode an ArrayBuffer using the charset found in the HTTP Content-Type header
+ *  or in the HTML <meta charset> / <meta http-equiv=Content-Type> tag.
+ *  Falls back to UTF-8 if nothing is detected. */
+function decodeHtml(buf: ArrayBuffer, contentTypeHeader: string | null): string {
+  // 1. Try charset from HTTP header first.
+  const ctCharset = contentTypeHeader?.match(/charset=([^\s;]+)/i)?.[1];
+  if (ctCharset) {
+    try {
+      return new TextDecoder(ctCharset, { fatal: false }).decode(buf);
+    } catch { /* unknown label — fall through */ }
+  }
+
+  // 2. Peek at the first 2 KB decoded as latin-1 (lossless byte-read)
+  //    to find a <meta charset> or <meta http-equiv=Content-Type> tag.
+  const peek = new TextDecoder('latin1').decode(buf.slice(0, 2048));
+  const metaCharset =
+    peek.match(/<meta[^>]+charset=["']?\s*([^"'\s;>]+)/i)?.[1] ??
+    peek.match(/<meta[^>]+content=["'][^"']*charset=([^"'\s;>]+)/i)?.[1];
+  if (metaCharset) {
+    try {
+      return new TextDecoder(metaCharset, { fatal: false }).decode(buf);
+    } catch { /* unknown label — fall through */ }
+  }
+
+  // 3. Default to UTF-8.
+  return new TextDecoder('utf-8', { fatal: false }).decode(buf);
 }
 
 function extractTitle(html: string): string | null {
@@ -58,7 +88,8 @@ export async function fetchPageTitle(url: string): Promise<string | null> {
       redirect: 'follow',
     });
     if (!res.ok) return null;
-    const html = await res.text();
+    const buf = await res.arrayBuffer();
+    const html = decodeHtml(buf, res.headers.get('content-type'));
     return extractTitle(html);
   } catch {
     return null;
