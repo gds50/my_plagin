@@ -32,6 +32,9 @@ export function BookmarksWidget({ widget, wsId, pageId }: Props) {
   // Per-widget edit mode — independent of the global edit mode.
   const [localEdit, setLocalEdit] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  // Intra-widget reorder state
+  const [dragSrcId, setDragSrcId] = useState<string | null>(null);
+  const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
 
   // Effective edit-mode for THIS widget's items: any of the two flags.
   const isEditing = editMode || localEdit;
@@ -57,6 +60,21 @@ export function BookmarksWidget({ widget, wsId, pageId }: Props) {
 
   const onDelete = (id: string) => {
     void patch(wsId, pageId, widget.id, { items: cfg.items.filter((i) => i.id !== id) });
+  };
+
+  // Move dragSrcId before targetId in the list
+  const onReorderDrop = (targetId: string) => {
+    if (!dragSrcId || dragSrcId === targetId) return;
+    const items = [...cfg.items];
+    const srcIdx = items.findIndex((i) => i.id === dragSrcId);
+    if (srcIdx === -1) return;
+    const [moved] = items.splice(srcIdx, 1);
+    const tgtIdx = items.findIndex((i) => i.id === targetId);
+    if (tgtIdx === -1) return;
+    items.splice(tgtIdx, 0, moved);
+    void patch(wsId, pageId, widget.id, { items });
+    setDragSrcId(null);
+    setDragOverItemId(null);
   };
 
   // Cross-widget DnD is only enabled in the global full edit mode.
@@ -167,12 +185,18 @@ export function BookmarksWidget({ widget, wsId, pageId }: Props) {
               layout={cfg.layout}
               showIcons={cfg.showIcons}
               isEditing={isEditing}
-              draggable={editMode}
+              draggable={isEditing}
               wsId={wsId}
               pageId={pageId}
               widgetId={widget.id}
+              isSameWidgetDragging={dragSrcId !== null}
+              isReorderTarget={dragOverItemId === b.id && dragSrcId !== b.id}
               onEdit={() => onEdit(b)}
               onDelete={() => onDelete(b.id)}
+              onDragStarted={() => setDragSrcId(b.id)}
+              onDragEnded={() => { setDragSrcId(null); setDragOverItemId(null); }}
+              onReorderDragOver={() => setDragOverItemId(b.id)}
+              onReorderDrop={() => onReorderDrop(b.id)}
             />
           ))}
         </div>
@@ -196,8 +220,14 @@ function BookmarkItem({
   wsId,
   pageId,
   widgetId,
+  isSameWidgetDragging,
+  isReorderTarget,
   onEdit,
   onDelete,
+  onDragStarted,
+  onDragEnded,
+  onReorderDragOver,
+  onReorderDrop,
 }: {
   bookmark: Bookmark;
   layout: 'list' | 'grid';
@@ -207,8 +237,14 @@ function BookmarkItem({
   wsId: string;
   pageId: string;
   widgetId: string;
+  isSameWidgetDragging: boolean;
+  isReorderTarget: boolean;
   onEdit: () => void;
   onDelete: () => void;
+  onDragStarted: () => void;
+  onDragEnded: () => void;
+  onReorderDragOver: () => void;
+  onReorderDrop: () => void;
 }) {
   const onDragStart = (e: React.DragEvent) => {
     if (!draggable) return;
@@ -220,14 +256,33 @@ function BookmarkItem({
       url: bookmark.url,
       title: bookmark.title,
     });
+    onDragStarted();
   };
 
   return (
-    <div className="group relative min-w-0">
+    <div
+      className={cn(
+        'group relative min-w-0',
+        isReorderTarget && 'ring-1 ring-accent rounded-lg',
+      )}
+      onDragOver={(e) => {
+        if (!isSameWidgetDragging) return;
+        e.preventDefault();
+        e.stopPropagation();
+        onReorderDragOver();
+      }}
+      onDrop={(e) => {
+        if (!isSameWidgetDragging) return;
+        e.preventDefault();
+        e.stopPropagation();
+        onReorderDrop();
+      }}
+    >
       <a
         href={bookmark.url}
         draggable={draggable}
         onDragStart={onDragStart}
+        onDragEnd={onDragEnded}
         className={cn(
           'block rounded-lg hover:bg-bg-soft/60 transition-colors',
           draggable && 'cursor-grab active:cursor-grabbing',
